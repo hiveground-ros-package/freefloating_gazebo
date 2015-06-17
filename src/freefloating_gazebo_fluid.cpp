@@ -43,13 +43,13 @@ void FreeFloatingFluidPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
   std::string fluid_topic = "current";
 
   if (_sdf->HasElement("descriptionParam"))
-    description_ = _sdf->Get<std::string>("descriptionParam");
+    description_ = _sdf->Get < std::string > ("descriptionParam");
   if (_sdf->HasElement("surface"))
   {
     has_surface_ = true;
     // get one surface point
     math::Vector3 surface_point;
-    ReadVector3(_sdf->Get<std::string>("surface"), surface_point);
+    ReadVector3(_sdf->Get < std::string > ("surface"), surface_point);
     // get gravity
     const math::Vector3 WORLD_GRAVITY = world_->GetPhysicsEngine()->GetGravity().Normalize();
     // water surface is orthogonal to gravity
@@ -57,7 +57,7 @@ void FreeFloatingFluidPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sd
   }
 
   if (_sdf->HasElement("fluidTopic"))
-    fluid_topic = _sdf->Get<std::string>("fluidTopic");
+    fluid_topic = _sdf->Get < std::string > ("fluidTopic");
 
   // register ROS node
   rosnode_ = new ros::NodeHandle("gazebo");
@@ -225,6 +225,7 @@ void FreeFloatingFluidPlugin::ParseNewModel(const physics::ModelPtr &_model)
   unsigned int link_index;
   physics::LinkPtr sdf_link;
   bool found;
+
   for (urdf_node = urdf_root->FirstChild(); urdf_node != 0; urdf_node = urdf_node->NextSibling())
   {
     if (urdf_node->ValueStr() == "link")
@@ -233,10 +234,9 @@ void FreeFloatingFluidPlugin::ParseNewModel(const physics::ModelPtr &_model)
       found = false;
       for (link_index = 0; link_index < _model->GetLinks().size(); ++link_index)
       {
-        //ROS_INFO_STREAM(urdf_node->ToElement()->Attribute("name") << " " << _model->GetLinks()[link_index]->GetName());
-
         if (urdf_node->ToElement()->Attribute("name") == _model->GetLinks()[link_index]->GetName())
         {
+          ROS_INFO_STREAM("URDF " << urdf_node->ToElement()->Attribute("name"));
           found = true;
           sdf_link = _model->GetLinks()[link_index];
           break;
@@ -254,7 +254,6 @@ void FreeFloatingFluidPlugin::ParseNewModel(const physics::ModelPtr &_model)
             new_buoy_link.model_name = _model->GetName();            // in case this model is deleted
             new_buoy_link.link = sdf_link;    // to apply forces
             new_buoy_link.limit = .1;
-
             // get data from urdf
             // default values
             new_buoy_link.buoyancy_center = sdf_link->GetInertial()->GetCoG();
@@ -288,6 +287,7 @@ void FreeFloatingFluidPlugin::ParseNewModel(const physics::ModelPtr &_model)
       }       // out of condition: in sdf
     }           // out of loop: links
   }               // out of loop: all urdf nodes
+
   if (previous_link_number == buoyant_links_.size())
     ROS_INFO_NAMED("Buoyancy plugin", "No links subject to buoyancy inside %s", _model->GetName().c_str());
   else
